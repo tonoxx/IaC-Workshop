@@ -1,0 +1,60 @@
+---
+# =============================================================================
+# Common Role - Base configuration for all servers
+# =============================================================================
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Install common packages
+  ansible.builtin.package:
+    name: "{{ common_packages }}"
+    state: present
+
+- name: Set timezone
+  ansible.builtin.timezone:
+    name: "{{ common_timezone }}"
+
+- name: Configure NTP
+  ansible.builtin.package:
+    name: chrony
+    state: present
+  notify: restart chrony
+
+- name: Enable and start chrony
+  ansible.builtin.service:
+    name: chrony
+    state: started
+    enabled: true
+
+- name: Configure sysctl parameters
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+  loop: "{{ common_sysctl_params | dict2items }}"
+  when: common_sysctl_params is defined
+
+- name: Create admin users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups | default(['sudo']) }}"
+    shell: /bin/bash
+    state: present
+  loop: "{{ common_admin_users }}"
+  when: common_admin_users is defined
+
+- name: Set authorized keys for admin users
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.ssh_key }}"
+    state: present
+  loop: "{{ common_admin_users }}"
+  when: 
+    - common_admin_users is defined
+    - item.ssh_key is defined
+

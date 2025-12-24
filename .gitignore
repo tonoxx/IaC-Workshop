@@ -1,0 +1,71 @@
+# =============================================================================
+# AI-Driven IaC Workshop - Git Ignore
+# =============================================================================
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+*.tfvars
+!example.tfvars
+
+# Ansible
+*.retry
+.vault_pass
+inventory/dynamic
+*.pyc
+__pycache__/
+
+# AWS
+.aws/
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Secrets
+secrets/
+*.pem
+*.key
+.env
+.env.*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Python
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Continue AI
+.continue/
+

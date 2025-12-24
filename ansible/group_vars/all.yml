@@ -1,0 +1,15 @@
+---
+# =============================================================================
+# AI-Driven IaC Workshop - Global Variables
+# =============================================================================
+
+# Project settings
+project_name: iac-workshop
+environment: dev
+
+# AWS Region
+aws_region: ap-northeast-1
+
+# Common settings
+common_timezone: Asia/Tokyo
+

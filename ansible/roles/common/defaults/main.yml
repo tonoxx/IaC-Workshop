@@ -1,0 +1,34 @@
+---
+# =============================================================================
+# Common Role - Default Variables
+# =============================================================================
+
+# Timezone setting
+common_timezone: "Asia/Tokyo"
+
+# Common packages to install
+common_packages:
+  - curl
+  - wget
+  - vim
+  - htop
+  - tree
+  - unzip
+  - jq
+  - git
+  - net-tools
+  - dnsutils
+
+# Sysctl parameters for performance tuning
+common_sysctl_params:
+  net.core.somaxconn: 65535
+  net.ipv4.tcp_max_syn_backlog: 65535
+  vm.swappiness: 10
+
+# Admin users (override in group_vars or host_vars)
+# common_admin_users:
+#   - name: admin
+#     groups:
+#       - sudo
+#     ssh_key: "ssh-rsa AAAA..."
+

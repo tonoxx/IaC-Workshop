@@ -1,0 +1,72 @@
+{
+  "name": "AI-Driven IaC Workshop",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "latest",
+      "installTFsec": true,
+      "installTerraformDocs": true
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "hashicorp.terraform",
+        "redhat.ansible",
+        "redhat.vscode-yaml",
+        "amazonwebservices.aws-toolkit-vscode",
+        "continue.continue",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "github.copilot",
+        "4ops.terraform",
+        "samuelcolvin.jinjahtml",
+        "wholroyd.jinja"
+      ],
+      "settings": {
+        "terraform.languageServer.enable": true,
+        "terraform.experimentalFeatures.validateOnSave": true,
+        "ansible.python.interpreterPath": "/usr/local/bin/python",
+        "redhat.telemetry.enabled": false,
+        "[terraform]": {
+          "editor.defaultFormatter": "hashicorp.terraform",
+          "editor.formatOnSave": true
+        },
+        "[ansible]": {
+          "editor.defaultFormatter": "redhat.ansible"
+        },
+        "files.associations": {
+          "*.yml": "ansible",
+          "*.yaml": "ansible",
+          "playbook*.yml": "ansible",
+          "*.tf": "terraform"
+        }
+      }
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}/.aws,target=/home/vscode/.aws,type=bind,consistency=cached"
+  ],
+  "containerEnv": {
+    "TF_PLUGIN_CACHE_DIR": "/home/vscode/.terraform.d/plugin-cache",
+    "ANSIBLE_HOST_KEY_CHECKING": "False"
+  },
+  "forwardPorts": [],
+  "portsAttributes": {
+    "8080": {
+      "label": "Web Preview",
+      "onAutoForward": "notify"
+    }
+  }
+}
+

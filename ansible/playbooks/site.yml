@@ -1,0 +1,47 @@
+---
+# =============================================================================
+# AI-Driven IaC Workshop - Main Playbook
+# =============================================================================
+
+- name: Configure all servers
+  hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Display host information
+      ansible.builtin.debug:
+        msg: |
+          Hostname: {{ inventory_hostname }}
+          OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          IP: {{ ansible_default_ipv4.address | default('N/A') }}
+
+  roles:
+    - role: common
+      tags: [common, base]
+
+# -----------------------------------------------------------------------------
+# Web Servers
+# -----------------------------------------------------------------------------
+
+- name: Configure web servers
+  hosts: webservers
+  become: true
+
+  roles:
+    - role: nginx
+      tags: [nginx, web]
+
+# -----------------------------------------------------------------------------
+# Database Servers
+# -----------------------------------------------------------------------------
+
+- name: Configure database servers
+  hosts: dbservers
+  become: true
+
+  roles:
+    - role: mysql
+      tags: [mysql, database]
+      when: false  # Enable when role is ready
+
