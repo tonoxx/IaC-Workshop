@@ -1,0 +1,165 @@
+schemaVersion: 2.2.0
+metadata:
+  name: ai-driven-iac-workshop
+  displayName: AI-Driven IaC Workshop
+  description: AWS CLI, Ansible, Terraform, and Continue AI for Infrastructure as Code development
+  language: hcl
+  tags:
+    - terraform
+    - ansible
+    - aws
+    - iac
+
+components:
+  - name: tools
+    container:
+      image: quay.io/devfile/universal-developer-image:ubi8-latest
+      memoryLimit: 4Gi
+      memoryRequest: 1Gi
+      cpuLimit: "2"
+      cpuRequest: "0.5"
+      mountSources: true
+      env:
+        - name: TF_PLUGIN_CACHE_DIR
+          value: /home/user/.terraform.d/plugin-cache
+        - name: ANSIBLE_HOST_KEY_CHECKING
+          value: "False"
+        - name: AWS_DEFAULT_REGION
+          value: ap-northeast-1
+      endpoints:
+        - name: web-preview
+          targetPort: 8080
+          exposure: public
+          protocol: http
+
+commands:
+  - id: install-tools
+    exec:
+      label: "Install IaC Tools"
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: |
+        echo "🚀 Installing IaC Tools..."
+        
+        # Create directories
+        mkdir -p ~/.terraform.d/plugin-cache
+        mkdir -p ~/.ansible
+        
+        # Install Terraform
+        if ! command -v terraform &> /dev/null; then
+          echo "📦 Installing Terraform..."
+          curl -fsSL https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip -o /tmp/terraform.zip
+          unzip -o /tmp/terraform.zip -d /tmp
+          sudo mv /tmp/terraform /usr/local/bin/
+          rm /tmp/terraform.zip
+        fi
+        
+        # Install AWS CLI v2
+        if ! command -v aws &> /dev/null; then
+          echo "📦 Installing AWS CLI..."
+          curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
+          unzip -o /tmp/awscliv2.zip -d /tmp
+          sudo /tmp/aws/install --update
+          rm -rf /tmp/aws /tmp/awscliv2.zip
+        fi
+        
+        # Install Ansible
+        if ! command -v ansible &> /dev/null; then
+          echo "📦 Installing Ansible..."
+          pip3 install --user ansible ansible-lint
+        fi
+        
+        # Install TFLint
+        if ! command -v tflint &> /dev/null; then
+          echo "📦 Installing TFLint..."
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+        fi
+        
+        # Install Checkov
+        if ! command -v checkov &> /dev/null; then
+          echo "📦 Installing Checkov..."
+          pip3 install --user checkov
+        fi
+        
+        # Add local bin to PATH
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+        
+        echo "✅ Installation complete!"
+      group:
+        kind: build
+        isDefault: true
+
+  - id: verify-tools
+    exec:
+      label: "Verify Tool Installation"
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: |
+        echo "📦 Installed Tools:"
+        echo "==================="
+        echo -n "AWS CLI: " && aws --version 2>/dev/null || echo "Not installed"
+        echo -n "Terraform: " && terraform version 2>/dev/null | head -1 || echo "Not installed"
+        echo -n "Ansible: " && ansible --version 2>/dev/null | head -1 || echo "Not installed"
+        echo -n "TFLint: " && tflint --version 2>/dev/null || echo "Not installed"
+        echo -n "Checkov: " && checkov --version 2>/dev/null || echo "Not installed"
+      group:
+        kind: run
+
+  - id: aws-configure
+    exec:
+      label: "Configure AWS CLI"
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: aws configure
+      group:
+        kind: run
+
+  - id: terraform-init
+    exec:
+      label: "Terraform Init (dev)"
+      component: tools
+      workingDir: ${PROJECT_SOURCE}/terraform/environments/dev
+      commandLine: terraform init
+      group:
+        kind: run
+
+  - id: terraform-plan
+    exec:
+      label: "Terraform Plan (dev)"
+      component: tools
+      workingDir: ${PROJECT_SOURCE}/terraform/environments/dev
+      commandLine: terraform plan
+      group:
+        kind: run
+
+  - id: terraform-apply
+    exec:
+      label: "Terraform Apply (dev)"
+      component: tools
+      workingDir: ${PROJECT_SOURCE}/terraform/environments/dev
+      commandLine: terraform apply
+      group:
+        kind: run
+
+  - id: ansible-lint
+    exec:
+      label: "Ansible Lint"
+      component: tools
+      workingDir: ${PROJECT_SOURCE}/ansible
+      commandLine: ansible-lint playbooks/
+      group:
+        kind: run
+
+  - id: security-scan
+    exec:
+      label: "Security Scan (Checkov)"
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: checkov -d terraform/
+      group:
+        kind: run
+
+events:
+  postStart:
+    - install-tools
+
