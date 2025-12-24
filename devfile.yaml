@@ -14,11 +14,12 @@ components:
   - name: tools
     container:
       image: quay.io/devfile/universal-developer-image:ubi8-latest
-      memoryLimit: 4Gi
-      memoryRequest: 1Gi
-      cpuLimit: "2"
-      cpuRequest: "0.5"
+      memoryLimit: 6Gi
+      memoryRequest: 2Gi
+      cpuLimit: "4"
+      cpuRequest: "1"
       mountSources: true
+      sourceMapping: /projects
       env:
         - name: TF_PLUGIN_CACHE_DIR
           value: /home/user/.terraform.d/plugin-cache
@@ -26,6 +27,8 @@ components:
           value: "False"
         - name: AWS_DEFAULT_REGION
           value: ap-northeast-1
+        - name: PATH
+          value: /home/user/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       endpoints:
         - name: web-preview
           targetPort: 8080
@@ -159,7 +162,8 @@ commands:
       group:
         kind: run
 
-events:
-  postStart:
-    - install-tools
+# Note: Run 'install-tools' command manually after workspace starts
+# events:
+#   postStart:
+#     - install-tools
 
