@@ -22,11 +22,6 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Ansible
-RUN apt-add-repository --yes --update ppa:ansible/ansible \
-    && apt-get install -y ansible ansible-lint \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install AWS Session Manager Plugin
 RUN curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb" \
     && dpkg -i session-manager-plugin.deb \
