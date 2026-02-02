@@ -11,6 +11,12 @@ variable "project_name" {
   type        = string
 }
 
+variable "participant_id" {
+  description = "Unique identifier for each workshop participant"
+  type        = string
+  default     = ""
+}
+
 variable "environment" {
   description = "Environment name (dev, staging, prod)"
   type        = string
@@ -33,7 +39,8 @@ variable "availability_zones" {
 # -----------------------------------------------------------------------------
 
 locals {
-  name_prefix = "${var.project_name}-${var.environment}"
+  # Include participant_id in name if provided
+  name_prefix = var.participant_id != "" ? "${var.project_name}-${var.participant_id}-${var.environment}" : "${var.project_name}-${var.environment}"
   
   azs = length(var.availability_zones) > 0 ? var.availability_zones : [
     "ap-northeast-1a",
@@ -48,11 +55,14 @@ locals {
     for i, az in local.azs : cidrsubnet(var.vpc_cidr, 8, i + 100)
   ]
 
-  common_tags = {
-    Project     = var.project_name
-    Environment = var.environment
-    Module      = "vpc"
-  }
+  common_tags = merge(
+    {
+      Project     = var.project_name
+      Environment = var.environment
+      Module      = "vpc"
+    },
+    var.participant_id != "" ? { ParticipantId = var.participant_id } : {}
+  )
 }
 
 # -----------------------------------------------------------------------------
